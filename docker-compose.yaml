@@ -1,0 +1,9 @@
+version: '3'
+services:    #服务根节点
+  ai2pptx:
+    container_name: ai2pptx
+    image: chatbookai/ai-to-pptx:0.2
+    volumes:
+      - .:/var/www/html/aipptx
+    ports:
+      - 8080:80

@@ -1,18 +1,21 @@
 <?php
-error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT & ~E_NOTICE & ~E_WARNING); 
+error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT & ~E_NOTICE & ~E_WARNING);
+
 require_once('config.inc.php');
 
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, cache-control, Authorization, X-Requested-With, satoken, Token");
 header("Content-type: text/html; charset=utf-8");
-header('Content-Type: text/event-stream');
+//header('Content-Type: text/event-stream');
 header('Cache-Control: no-cache');
 
 // Handle preflight requests
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
 }
+
+
 
 $_POST = json_decode(file_get_contents("php://input"), true);
 
@@ -58,22 +61,25 @@ if($_POST['action'] == 'stream' && $_POST['subject'] != '')   {
                 "content" => $promptText
             ]
         ],
-        "frequency_penalty" => 0,
+/*        "frequency_penalty" => 0,
         "max_tokens" => 2048,
         "presence_penalty" => 0,
         "response_format" => [
             "type" => "text"
         ],
-        "stream" => true,
+        "stream" => false,
         "temperature" => 0,
         "top_p" => 1,
         "tool_choice" => "none",
-        "logprobs" => false,
+        "logprobs" => false,*/
     ];
-    $CURLOPT_POSTFIELDS = json_encode($CURLOPT_POSTFIELDS, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
+    $CURLOPT_POSTFIELDS = json_encode($CURLOPT_POSTFIELDS, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    print_r($curl);
+
+    $completions_url = $API_URL . '/api/chat';
     curl_setopt_array($curl, array(
-        CURLOPT_URL => $API_URL . '/chat/completions',
+        CURLOPT_URL => $completions_url,
         CURLOPT_RETURNTRANSFER => false,
         CURLOPT_WRITEFUNCTION => function($curl, $data) {
             echo $data;
@@ -101,23 +107,5 @@ if($_POST['action'] == 'stream' && $_POST['subject'] != '')   {
     flush();
 
 }
-
-/*
-CURLOPT_WRITEFUNCTION => function($curl, $data) use (&$FullResponeText) {
-    // 使用正则表达式提取 "content":"..." 部分的内容
-    if (preg_match('/"content":"([^"]*)"/', $data, $matches)) {
-      $outputData = $matches[1];
-      $FullResponeText .= $outputData;
-      echo 'data: {"status":3,"text":"'.$outputData.'"}'."\n\r";
-      ob_flush();
-      flush();
-      return strlen($data);
-    }
-    else {
-      echo $FullResponeText;
-    }
-    return strlen($data);
-},
-*/
 
 ?>

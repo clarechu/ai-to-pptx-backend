@@ -4,9 +4,12 @@
 # 安装Redis服务器端和PHP的Redis扩展
 # /var/www/html/aipptx/cache 和 /var/www/html/aipptx/output 两个目录要求可写
 
+FROM chatbookai/ai-to-pptx as static
 
 # 使用官方的 PHP 8.2 镜像，并包含 Apache
 FROM php:8.2-apache
+
+COPY 95proxies /etc/apt/apt.conf.d/95proxies
 
 # 安装所需的 PHP 扩展
 RUN apt-get update && apt-get install -y \
@@ -14,6 +17,9 @@ RUN apt-get update && apt-get install -y \
     libcurl4-openssl-dev \
     unzip \
     redis \
+    git  \
+    nodejs  \
+    npm \
     && docker-php-ext-install zip curl pdo_mysql
 
 # 安装 PHP 的 Redis 扩展
@@ -39,13 +45,10 @@ RUN mkdir -p /var/www/html/aipptx/output && \
     chown -R www-data:www-data /var/www/html/aipptx/output && \
     chmod -R 775 /var/www/html/aipptx/output
 
-
-# 安装 git Node.js 和 npm, 主要用于安装和编译前端项目
-RUN apt-get update && apt-get install -y git nodejs npm
-
 # 克隆 ai-to-pptx 项目到 /var/www/html/ai-to-pptx
 RUN mkdir -p /var/www/html/ai-to-pptx
-RUN git clone https://github.com/chatbookai/ai-to-pptx.git /var/www/html/ai-to-pptx
+RUN export HTTPS_PROXY=http://172.21.61.30:10811 && \
+    git clone https://github.com/chatbookai/ai-to-pptx.git /var/www/html/ai-to-pptx
 
 # 修改 Config.ts 文件中的 BackendApi 值
 # 源代码中是后端的演示地址, 需要在前端中修改为DOCKER中本地镜像中的地址.
@@ -53,11 +56,16 @@ RUN git clone https://github.com/chatbookai/ai-to-pptx.git /var/www/html/ai-to-p
 
 RUN sed -i 's|export const BackendApi = .*|export const BackendApi = "/aipptx/";|' /var/www/html/ai-to-pptx/src/views/AiPPTX/Config.ts
 
+
+
 # 安装 ai-to-pptx 项目的依赖
 WORKDIR /var/www/html/ai-to-pptx
-RUN npm install
-RUN npm run build
-RUN mv /var/www/html/ai-to-pptx/webroot/* /var/www/html
+
+COPY --from=static /var/www/html /var/www/html
+
+#RUN npm install \
+#    && npm run build \
+#    && mv /var/www/html/ai-to-pptx/webroot/* /var/www/html
 
 # 暴露端口 80（Apache 默认端口）和 6379（Redis 默认端口）
 EXPOSE 80

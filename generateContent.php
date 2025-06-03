@@ -1,4 +1,5 @@
 <?php
+
 error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT & ~E_NOTICE & ~E_WARNING); 
 require_once('config.inc.php');
 require_once('./AiToPPTX/include.inc.php');
@@ -190,7 +191,7 @@ if($_POST['asyncGenPptx'] == true)   {
     $CURLOPT_POSTFIELDS = [
         "model" => $API_MODE,
         "messages" => $messages,
-        "frequency_penalty" => 0,
+        /*"frequency_penalty" => 0,
         "max_tokens" => 2048,
         "presence_penalty" => 0,
         "response_format" => [
@@ -200,13 +201,14 @@ if($_POST['asyncGenPptx'] == true)   {
         "temperature" => 0,
         "top_p" => 1,
         "tool_choice" => "none",
-        "logprobs" => false,
+        "logprobs" => false,*/
     ];
+
     $CURLOPT_POSTFIELDS = json_encode($CURLOPT_POSTFIELDS, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     $FullResponeText    = '';
     $分段结构输出情况     = [];
     curl_setopt_array($curl, array(
-        CURLOPT_URL => $API_URL . '/chat/completions',
+        CURLOPT_URL => $API_URL . '/api/chat',
         CURLOPT_RETURNTRANSFER => false,
         CURLOPT_WRITEFUNCTION => function($curl, $data) use (&$FullResponeText, &$分段结构输出情况, &$pptId, &$TotalPagesNumber, &$redis) {
           static $buffer = '';  // 用于存储不完整的数据块

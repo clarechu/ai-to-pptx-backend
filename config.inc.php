@@ -1,12 +1,14 @@
 <?php
+
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, cache-control, Authorization, X-Requested-With, satoken, Token");
 header("Content-type: text/html; charset=utf-8");
-header('Content-Type: text/event-stream');
+//header('Content-Type: text/event-stream');
 header('Cache-Control: no-cache');
 
-error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT & ~E_NOTICE & ~E_WARNING); 
+error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT & ~E_NOTICE & ~E_WARNING);
+
 
 global $allowedOrigins;
 $allowedOrigins = [];
@@ -15,11 +17,15 @@ $allowedOrigins[] = 'http://localhost:3000/';
 
 // #################################################################################
 $redis = new Redis();
-$redis->connect('127.0.0.1', 6379);
 
-$API_URL    = $redis->get("API_URL");
-$API_MODE   = $redis->get("API_MODE");
-$API_KEY    = $redis->get("API_KEY");
+$redis_host = getenv('REDIS_HOST') ?: '127.0.0.1';
+
+
+$redis->connect($redis_host, 6379);
+
+$API_URL = $redis->get("API_URL");
+$API_MODE = $redis->get("API_MODE");
+$API_KEY = $redis->get("API_KEY");
 
 $Global_Templates = [
     [
@@ -41,7 +47,8 @@ $Global_Templates = [
 ];
 
 
-function FilterString($input) {
+function FilterString($input)
+{
     return preg_replace('/[^a-zA-Z0-9_]/', '', $input);
 }
 
