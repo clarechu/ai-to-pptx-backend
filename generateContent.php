@@ -176,7 +176,6 @@ if($_POST['asyncGenPptx'] == true)   {
     //输出的时候,第一页和第二页不需要做扩充,所以可以直接输出
     //依赖于AI的部分是从第三页开始
     $TotalPagesNumber = 根据大纲得到PPTX页码($outlineMarkdown);
-
     $curl       = curl_init();
 
     $messages 	= [];
@@ -191,6 +190,7 @@ if($_POST['asyncGenPptx'] == true)   {
     $CURLOPT_POSTFIELDS = [
         "model" => $API_MODE,
         "messages" => $messages,
+        "stream" => true,
         /*"frequency_penalty" => 0,
         "max_tokens" => 2048,
         "presence_penalty" => 0,
@@ -268,8 +268,7 @@ if($_POST['asyncGenPptx'] == true)   {
                     $redis->hSet("PPTX_CONTENT_".date('Ymd'), $pptId, json_encode(['data'=>$FullResponeText, 'total'=>$TotalPagesNumber, 'current'=>$CurrentPage, 'finished'=>false]));
                     //$redis->hSet("PPTX_CurrentPage_".date('Ymd'), $pptId, $CurrentPage);
                   }
-                }
-                else {
+                } else {
                   //需要得到上一个结构是什么
                   $所有内容的结构信息 = [];
                   $上一个结构信息 = [];
@@ -330,31 +329,4 @@ if($_POST['asyncGenPptx'] == true)   {
 
 }
 
-
-
-/*
-
-if($data != "[DONE]" && $data != "")   {
-$Content = '';
-try {
-	$JsonArray = (array)json_decode($data, true);
-	if (isset($JsonArray['choices']) && is_array($JsonArray['choices'])) {
-		foreach ($JsonArray['choices'] as $Item) {
-			if (isset($Item['delta']['content'])) {
-				$Content .= $Item['delta']['content'];
-			}
-		}
-	}
-	$ContentArray = ['text' => $Content];
-	$Content = json_encode($ContentArray);
-} catch (Exception $Error) {
-	error_log("Error processing JSON data: " . $Error->getMessage());
-}
-echo $Content;
-ob_flush();
-flush();
-return strlen($Content);
-}
-
-*/
 ?>

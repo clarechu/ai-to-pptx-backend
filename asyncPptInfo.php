@@ -66,6 +66,7 @@ else {
   $pptxProperty = base64_encode(gzencode(json_encode($Markdown_To_JsonData_Data)));
   $LastPagePPTX = 0;
 }
+
 $redis->hSet("PPTX_CurrentPage_".date('Ymd'), $pptId, $currentId);
 
 $RS             = [];
