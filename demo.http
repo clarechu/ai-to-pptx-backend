@@ -13,7 +13,7 @@ Content-Type: application/json
     }
   ],
   "temperature": 0.7,
-  "stream": false
+  "stream": true
 }
 
 ###
@@ -26,5 +26,15 @@ Content-Type: application/json
   "messages": [
     { "role": "user", "content": "你好，你是谁？" }
   ],
-  "stream": false
+  "stream": true
+}
+
+
+###
+
+POST http://localhost:8080/aipptx/generateOutline.php
+Content-Type: application/json
+
+{
+  "subject": "2025年就业市场预测"
 }

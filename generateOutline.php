@@ -7,7 +7,7 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, cache-control, Authorization, X-Requested-With, satoken, Token");
 header("Content-type: text/html; charset=utf-8");
-//header('Content-Type: text/event-stream');
+header('Content-Type: text/event-stream');
 header('Cache-Control: no-cache');
 
 // Handle preflight requests
@@ -55,6 +55,7 @@ if($_POST['action'] == 'stream' && $_POST['subject'] != '')   {
 
     $CURLOPT_POSTFIELDS = [
         "model" => $API_MODE,
+        "stream" => true,
         "messages" => [
             [
                 "role" => "user",
@@ -75,14 +76,14 @@ if($_POST['action'] == 'stream' && $_POST['subject'] != '')   {
     ];
 
     $CURLOPT_POSTFIELDS = json_encode($CURLOPT_POSTFIELDS, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-    print_r($curl);
 
     $completions_url = $API_URL . '/api/chat';
     curl_setopt_array($curl, array(
         CURLOPT_URL => $completions_url,
         CURLOPT_RETURNTRANSFER => false,
         CURLOPT_WRITEFUNCTION => function($curl, $data) {
-            echo $data;
+            $result = "data: " . $data . "\n";
+            echo $result;
             if(ob_get_level() > 0) ob_flush();
             flush();
             return strlen($data);
